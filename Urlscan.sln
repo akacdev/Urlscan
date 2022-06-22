@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urlscan", "Urlscan\Urlscan.csproj", "{42AE237B-2B27-466A-B619-C2BF19717DAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{61DA1CF5-1083-4467-B1A3-B411C98D88C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42AE237B-2B27-466A-B619-C2BF19717DAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42AE237B-2B27-466A-B619-C2BF19717DAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42AE237B-2B27-466A-B619-C2BF19717DAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42AE237B-2B27-466A-B619-C2BF19717DAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61DA1CF5-1083-4467-B1A3-B411C98D88C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61DA1CF5-1083-4467-B1A3-B411C98D88C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61DA1CF5-1083-4467-B1A3-B411C98D88C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61DA1CF5-1083-4467-B1A3-B411C98D88C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {781CC671-4923-4ECE-80EF-4E1DF324FCDC}
+	EndGlobalSection
+EndGlobal
