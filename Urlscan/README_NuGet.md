@@ -40,7 +40,7 @@ https://www.nuget.org/packages/Urlscan
 - EventHandler\<LiveScan> `UrlScanned`
 
 ## Official Links
-https://urlscan.io</br>
+https://urlscan.io
 https://twitter.com/urlscanio
 
 ## Example
