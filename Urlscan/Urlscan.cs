@@ -211,7 +211,7 @@ namespace Urlscan
         /// Download the screenshot of a scan as a byte array.
         /// </summary>
         /// <param name="res">The result you want to download a screenshot of.</param>
-        /// <returns></returns>
+        /// <returns>The screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<byte[]> DownloadScreenshot(Result res)
         {
@@ -224,7 +224,7 @@ namespace Urlscan
         /// Download the screenshot of a scan as a byte array.
         /// </summary>
         /// <param name="res">The UUID of a result you want to download a screenshot of.</param>
-        /// <returns></returns>
+        /// <returns>The screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<byte[]> DownloadScreenshot(string uuid)
         {
@@ -240,7 +240,7 @@ namespace Urlscan
         /// Download the screenshot of a scan as a stream.
         /// </summary>
         /// <param name="res">The UUID of a result you want to download a screenshot of.</param>
-        /// <returns></returns>
+        /// <returns>The stream, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<Stream> DownloadScreenshotStream(string uuid)
         {
@@ -256,7 +256,7 @@ namespace Urlscan
         /// Downlod the DOM/content of a scan as a string.
         /// </summary>
         /// <param name="res">The result you want to download the DOM of.</param>
-        /// <returns></returns>
+        /// <returns>The DOM, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<string> DownloadDOM(Result res)
         {
@@ -269,7 +269,7 @@ namespace Urlscan
         /// Downlod the DOM/content of a scan as a string.
         /// </summary>
         /// <param name="uuid">The UUID of a result you want to download the DOM of.</param>
-        /// <returns></returns>
+        /// <returns>The DOM, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<string> DownloadDOM(string uuid)
         {

@@ -9,6 +9,11 @@ This library can be downloaded as the package `Urlscan`. The main classes are `U
 
 https://www.nuget.org/packages/Urlscan
 
+### Obtaining API keys
+> API keys can be created in the user section `Settings & API`
+
+> Security identifier SID cookies can be obtained from the cookie storage. Make sure to only copy the value, without the name! 
+
 ## Features
 - Fully async
 - Full coverage of the free API endpoints, including user-only routes
