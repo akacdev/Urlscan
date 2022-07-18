@@ -38,8 +38,8 @@ namespace Urlscan
         private readonly JsonSerializerOptions JsonOptions = new();
         private readonly JsonSerializerOptions VerdictJsonOptions = new();
 
-        private readonly string _key;
-        private readonly string _sid;
+        private readonly string Key;
+        private readonly string Sid;
         public readonly bool UsesAccountSID;
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace Urlscan
         /// <exception cref="ArgumentNullException"></exception>
         public UrlscanClient(string key, string sid = null)
         {
-            _key = key; if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
-            _sid = sid;
+            Key = key; if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
+            Sid = sid;
             UsesAccountSID = sid is not null;
 
             Client = new(HttpHandler);
@@ -60,16 +60,16 @@ namespace Urlscan
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Client - actually-akac/Urlscan");
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            Client.DefaultRequestHeaders.Add("API-Key", _key);
+            Client.DefaultRequestHeaders.Add("API-Key", Key);
 
             JsonOptions.Converters.Add(new JsonStringEnumConverter(new EnumNamingPolicy()));
             VerdictJsonOptions.Converters.Add(new JsonStringEnumConverter(new VerdictNamingPolicy()));
         }
 
         /// <summary>
-        /// Fetcht the Urlscan statistics, such as how many scans are currently running.
+        /// Fetch the Urlscan statistics, such as how many scans are currently running.
         /// </summary>
-        public async Task<Stats> Stats()
+        public async Task<Stats> GetStats()
         {
             HttpResponseMessage res = await Client.Request($"{URL}/stats", HttpMethod.Get);
 
@@ -133,13 +133,13 @@ namespace Urlscan
         /// <param name="uuid"></param>
         /// <returns>The result, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<Result> Result(string uuid)
+        public async Task<Result> GetResult(string uuid)
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "Submission's UUID is null or empty.");
 
             HttpResponseMessage res = await Client.Request($"{URL}/api/v{Version}/result/{uuid}", HttpMethod.Get, target: HttpStatusCode.OK | HttpStatusCode.NotFound);
 
-            if (res.StatusCode == HttpStatusCode.OK) return await res.Deseralize<Result>();
+            if (res.StatusCode == HttpStatusCode.OK) return await res.Deseralize<Result>(JsonOptions);
             else return null;
         }
 
@@ -182,7 +182,7 @@ namespace Urlscan
 
             while (retries < MaxRetries)
             {
-                res = await Result(uuid);
+                res = await GetResult(uuid);
 
                 if (res is not null) return res;
                 else await Task.Delay(interval);
@@ -198,11 +198,11 @@ namespace Urlscan
         /// </summary>
         /// <returns></returns>
         /// <exception cref="UnauthorizedException"></exception>
-        public async Task<User> UserInfo()
+        public async Task<User> GetUserInfo()
         {
             if (!UsesAccountSID) throw new UnauthorizedException();
 
-            HttpResponseMessage res = await Client.Request($"{URL}/user/username", HttpMethod.Get, sid: _sid);
+            HttpResponseMessage res = await Client.Request($"{URL}/user/username", HttpMethod.Get, sid: Sid);
 
             return await res.Deseralize<User>(JsonOptions);
         }
@@ -211,7 +211,7 @@ namespace Urlscan
         /// Download the screenshot of a scan as a byte array.
         /// </summary>
         /// <param name="res">The result you want to download a screenshot of.</param>
-        /// <returns>The screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
+        /// <returns>The PNG screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<byte[]> DownloadScreenshot(Result res)
         {
@@ -224,7 +224,7 @@ namespace Urlscan
         /// Download the screenshot of a scan as a byte array.
         /// </summary>
         /// <param name="res">The UUID of a result you want to download a screenshot of.</param>
-        /// <returns>The screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
+        /// <returns>The PNG screenshot as a byte array, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<byte[]> DownloadScreenshot(string uuid)
         {
@@ -240,13 +240,49 @@ namespace Urlscan
         /// Download the screenshot of a scan as a stream.
         /// </summary>
         /// <param name="res">The UUID of a result you want to download a screenshot of.</param>
-        /// <returns>The stream, or <see langword="null"></see> if none is found.</returns>
+        /// <returns>The stream of a PNG screenshot, or <see langword="null"></see> if none is found.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<Stream> DownloadScreenshotStream(string uuid)
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "Result's UUID is null or empty.");
 
             HttpResponseMessage res = await Client.Request($"{URL}/screenshots/{uuid}.png", HttpMethod.Get, target: HttpStatusCode.OK | HttpStatusCode.NotFound);
+            if (res.StatusCode == HttpStatusCode.NotFound) return null;
+
+            return res.Content.ReadAsStream();
+        }
+
+        /// <summary>
+        /// Download the liveshot of an URL as a byte array.
+        /// </summary>
+        /// <param name="url">The URL you want to liveshot.</param>
+        /// <returns>The PNG liveshot, or <see langword="null"></see> if none is found.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<byte[]> Liveshot(string url, int width = 1280, int height = 1024)
+        {
+            if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url), "URL to liveshot is null or empty.");
+            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Width must be a positive value.");
+            if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Height must be a positive value.");
+
+            Stream str = await LiveshotStream(url, width, height);
+            if (str is null) return null;
+
+            return ((MemoryStream)str).ToArray();
+        }
+
+        /// <summary>
+        /// Download the liveshot of an URL as a śtream.
+        /// </summary>
+        /// <param name="res">The URL you want to liveshot.</param>+
+        /// <returns>The stream of a PNG liveshot, or <see langword="null"></see> if none is found.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<Stream> LiveshotStream(string url, int width = 1280, int height = 1024)
+        {
+            if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url), "URL to liveshot is null or empty.");
+            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Width must be a positive value.");
+            if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Height must be a positive value.");
+
+            HttpResponseMessage res = await Client.Request($"{URL}/liveshot/?&width={width}&height={height}&url={url}", HttpMethod.Get, target: HttpStatusCode.OK | HttpStatusCode.NotFound);
             if (res.StatusCode == HttpStatusCode.NotFound) return null;
 
             return res.Content.ReadAsStream();
@@ -336,7 +372,7 @@ namespace Urlscan
         /// <param name="threats">The threats that are hiding on this website, if any.</param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task Verdict(Result result, VerdictScope scope, VerdictType type, string comment, string[] brands, ThreatType[] threats)
+        public async Task AddVerdict(Result result, VerdictScope scope, VerdictType type, string comment, string[] brands, ThreatType[] threats)
         {
             string scopeValue = scope switch
             { 
@@ -345,7 +381,7 @@ namespace Urlscan
                 _ => throw new NotImplementedException($"{scope} is an unknown verdict scope.")
             };
 
-            await Verdict(new VerdictPayload()
+            await AddVerdict(new VerdictPayload()
             {
                 UUID = result.Task.UUID,
                 Scope = scope,
@@ -367,8 +403,8 @@ namespace Urlscan
         /// <param name="brands">The impersonated brands, like <c>Discord</c> or <c>Steam</c>, if any.</param>
         /// <param name="threats">The threats that are hiding on this website, if any.</param>
         /// <returns></returns>
-        public async Task Verdict(string uuid, VerdictScope scope, string scopeValue, VerdictType type, string comment, string[] brands, ThreatType[] threats)
-            => await Verdict(new VerdictPayload()
+        public async Task AddVerdict(string uuid, VerdictScope scope, string scopeValue, VerdictType type, string comment, string[] brands, ThreatType[] threats)
+            => await AddVerdict(new VerdictPayload()
             {
                 UUID = uuid,
                 Scope = scope,
@@ -387,7 +423,7 @@ namespace Urlscan
         /// <exception cref="UnauthorizedException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task Verdict(VerdictPayload payload)
+        public async Task AddVerdict(VerdictPayload payload)
         {
             if (!UsesAccountSID) throw new UnauthorizedException();
 
@@ -401,7 +437,7 @@ namespace Urlscan
 
             payload.Brands = payload.Brands.Select(x => x.ToLower()).ToArray();
 
-            await Client.Request($"{URL}/result/verdict/", HttpMethod.Post, JsonSerializer.Serialize(payload, VerdictJsonOptions), sid: _sid);
+            await Client.Request($"{URL}/result/verdict/", HttpMethod.Post, JsonSerializer.Serialize(payload, VerdictJsonOptions), sid: Sid);
         }
     }
 }

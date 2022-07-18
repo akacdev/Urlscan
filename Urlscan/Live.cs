@@ -40,8 +40,8 @@ namespace Urlscan
             }
         }
 
-        private static int _interval;
-        private static int _size;
+        private static int Interval;
+        private static int Size;
 
         /// <summary>
         /// Create a new instance of the client for polling live results.
@@ -53,19 +53,23 @@ namespace Urlscan
             if (interval < 3000) throw new ArgumentOutOfRangeException(nameof(interval), "Poll interval has to be at least 3000 ms.");
             if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Poll size has to be at least 1.");
 
-            _interval = interval;
-            _size = size;
+            Interval = interval;
+            Size = size;
 
-            Seen = new(_size);
-            Client = new(HttpHandler);
+            Seen = new(Size);
+            Client = new(HttpHandler)
+            {
+                DefaultRequestVersion = new Version(2, 0),
+            };
 
-            Client.DefaultRequestVersion = new Version(2, 0);
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Live Client - actually-akac/Urlscan");
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
-            Timer = new();
-            Timer.Interval = _interval;
+            Timer = new()
+            {
+                Interval = Interval
+            };
             Timer.Elapsed += async (o, e) => await Poll();
         }
 
@@ -101,7 +105,7 @@ namespace Urlscan
         /// <exception cref="Exception"></exception>
         private async Task Poll()
         {
-            HttpResponseMessage res = await Client.Request($"{URL}/json/live?size={_size}", HttpMethod.Get);
+            HttpResponseMessage res = await Client.Request($"{URL}/json/live?size={Size}", HttpMethod.Get);
             if (res.StatusCode != HttpStatusCode.OK)
             {
                 FailedRequests++;

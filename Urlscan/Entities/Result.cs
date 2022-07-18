@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Urlscan
@@ -328,10 +329,10 @@ namespace Urlscan
         public int SecureRequests { get; set; }
 
         [JsonPropertyName("securePercentage")]
-        public int SecurePercentage { get; set; }
+        public int? SecurePercentage { get; set; }
 
         [JsonPropertyName("IPv6Percentage")]
-        public int IPv6Percentage { get; set; }
+        public int? IPv6Percentage { get; set; }
 
         [JsonPropertyName("uniqCountries")]
         public int UniqCountries { get; set; }
@@ -469,13 +470,13 @@ namespace Urlscan
         public string[] Initiators { get; set; }
 
         [JsonPropertyName("redirects")]
-        public int Redirects { get; set; }
+        public int? Redirects { get; set; }
     }
 
     public class RegDomainStats
     {
         [JsonPropertyName("count")]
-        public int Count { get; set; }
+        public int? Count { get; set; }
 
         [JsonPropertyName("ips")]
         public string[] IPs { get; set; }
@@ -487,7 +488,7 @@ namespace Urlscan
         public int Size { get; set; }
 
         [JsonPropertyName("encodedSize")]
-        public int EncodedSize { get; set; }
+        public int? EncodedSize { get; set; }
 
         [JsonPropertyName("countries")]
         public string[] Countries { get; set; }
@@ -499,7 +500,7 @@ namespace Urlscan
         public SubDomainStats[] SubDomains { get; set; }
 
         [JsonPropertyName("redirects")]
-        public int Redirects { get; set; }
+        public int? Redirects { get; set; }
     }
 
     public class SubDomainStats
@@ -559,7 +560,24 @@ namespace Urlscan
         public DataRequest[] Requests { get; set; }
 
         [JsonPropertyName("cookies")]
-        public DataCookie[] Cookie { get; set; }
+        public object _items
+        {
+            get
+            {
+                return Items;
+            }
+
+            set
+            {
+                if (((JsonElement)value).ValueKind.ToString() == "Array")
+                {
+                    Items = ((JsonElement)value).Deserialize<DataCookie[]>();
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public DataCookie[] Items { get; set; }
 
         [JsonPropertyName("console")]
         public DataConsole[] Console { get; set; }
@@ -697,10 +715,10 @@ namespace Urlscan
         public double RequestTime { get; set; }
 
         [JsonPropertyName("proxyStart")]
-        public int ProxyStart { get; set; }
+        public double ProxyStart { get; set; }
 
         [JsonPropertyName("proxyEnd")]
-        public int ProxyEnd { get; set; }
+        public double ProxyEnd { get; set; }
 
         [JsonPropertyName("dnsStart")]
         public double DnsStart { get; set; }
@@ -721,16 +739,16 @@ namespace Urlscan
         public double SslEnd { get; set; }
 
         [JsonPropertyName("workerStart")]
-        public int WorkerStart { get; set; }
+        public double WorkerStart { get; set; }
 
         [JsonPropertyName("workerReady")]
-        public int WorkerReady { get; set; }
+        public double WorkerReady { get; set; }
 
         [JsonPropertyName("workerFetchStart")]
-        public int WorkerFetchStart { get; set; }
+        public double WorkerFetchStart { get; set; }
 
         [JsonPropertyName("workerRespondWithSettled")]
-        public int WorkerRespondWithSettled { get; set; }
+        public double WorkerRespondWithSettled { get; set; }
 
         [JsonPropertyName("sendStart")]
         public double SendStart { get; set; }
@@ -739,10 +757,10 @@ namespace Urlscan
         public double SendEnd { get; set; }
 
         [JsonPropertyName("pushStart")]
-        public int PushStart { get; set; }
+        public double PushStart { get; set; }
 
         [JsonPropertyName("pushEnd")]
-        public int PushEnd { get; set; }
+        public double PushEnd { get; set; }
 
         [JsonPropertyName("receiveHeadersEnd")]
         public double ReceiveHeadersEnd { get; set; }
@@ -775,10 +793,10 @@ namespace Urlscan
         public string Issuer { get; set; }
 
         [JsonPropertyName("validFrom")]
-        public int ValidFrom { get; set; }
+        public long ValidFrom { get; set; }
 
         [JsonPropertyName("validTo")]
-        public int ValidTo { get; set; }
+        public long ValidTo { get; set; }
 
         [JsonPropertyName("certificateTransparencyCompliance")]
         public string CertificateTransparencyCompliance { get; set; }

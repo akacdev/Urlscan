@@ -24,7 +24,7 @@ namespace Example
 
             if (cl.UsesAccountSID)
             {
-                User user = await cl.UserInfo();
+                User user = await cl.GetUserInfo();
 
                 Console.WriteLine($"Current user info:");
                 Console.WriteLine($"Registered: {(int)(DateTime.Now - user.CreatedAt).TotalDays} days ago");
@@ -46,7 +46,7 @@ namespace Example
                 Console.WriteLine();
             }
 
-            Stats stats = await cl.Stats();
+            Stats stats = await cl.GetStats();
             Console.WriteLine($"Currently running scan tasks: {stats.Running}");
             Console.WriteLine($"24h stats: public: {stats.Public}, unlisted: {stats.Unlisted}, private: {stats.Private}");
             Console.WriteLine($"Total: {stats.Total}\n");
@@ -147,7 +147,7 @@ namespace Example
                 Console.WriteLine("Press any key to submit a verdict to a known Discord phishing site.");
                 Console.ReadKey();
 
-                await cl.Verdict(new VerdictPayload()
+                await cl.AddVerdict(new VerdictPayload()
                 {
                     UUID = "8964cc71-ea31-476c-ba8f-863bf4bf6b2f",
                     Comment = "Running a Discord phishing scam with Discord HypeSquad as their target.",

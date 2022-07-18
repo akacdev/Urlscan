@@ -24,22 +24,24 @@ https://www.nuget.org/packages/Urlscan
 - Detailed documentation
 
 ## Available methods
-- Task<Stats> `Stats`()
-- Task<User> `UserInfo`()
-- Task<Submission> `Scan`(string url, string[] tags = null, string userAgent = null, string referer = null, bool overrideSafety = false, Visibility visibility = Visibility.Public, ScanCountry country = ScanCountry.Auto)
-- Task<Submission> `Scan`(ScanPayload payload)
-- Task<Result> `Poll`(Submission subm, int delay = 5000, int interval = 2000)
-- Task<Result> `Poll`(string uuid, int delay = 5000, int interval = 2000)
-- Task<Result> `Result`(string uuid)
-- Task `Verdict`(Result result, VerdictScope scope, VerdictType type, string comment, string[] brands, ThreatType[] threats)
-- Task `Verdict`(VerdictPayload payload)
-- Task `Verdict`(string uuid, VerdictScope scope, string scopeValue, VerdictType type, string comment, string[] brands, ThreatType[] threats)
-- Task<SearchResult[]> `Search`(string query, int amount = 100)
-- Task<Stream> `DownloadScreenshotStream`(string uuid)
-- Task<byte[]> `DownloadScreenshot`(Result res)
-- Task<byte[]> `DownloadScreenshot`(string uuid)
-- Task<string> `DownloadDOM`(Result res)
-- Task<string> `DownloadDOM`(string uuid)
+- Task<Stats> `GetStats()`
+- Task<User> `GetUserInfo()`
+- Task<Submission> `Scan(string url, string[] tags = null, string userAgent = null, string referer = null, bool overrideSafety = false, Visibility visibility = Visibility.Public, ScanCountry country = ScanCountry.Auto)`
+- Task<Submission> `Scan(ScanPayload payload)`
+- Task<Result> `Poll(Submission subm, int delay = 5000, int interval = 2000)`
+- Task<Result> `Poll(string uuid, int delay = 5000, int interval = 2000)`
+- Task<Result> `GetResult(string uuid)`
+- Task<SearchResult[]> `Search(string query, int amount = 100)`
+- Task<byte[]> `DownloadScreenshot(Result res)`
+- Task<byte[]> `DownloadScreenshot(string uuid)`
+- Task<Stream> `DownloadScreenshotStream(string uuid)`
+- Task<string> `DownloadDOM(Result res)`
+- Task<string> `DownloadDOM(string uuid)`
+- Task<byte[]> `Liveshot(string url, int width = 1280, int height = 1024)`
+- Task<Stream> `LiveshotStream(string url, int width = 1280, int height = 1024)`
+- Task `AddVerdict(Result result, VerdictScope scope, VerdictType type, string comment, string[] brands, ThreatType[] threats)`
+- Task `AddVerdict(VerdictPayload payload)`
+- Task `AddVerdict(string uuid, VerdictScope scope, string scopeValue, VerdictType type, string comment, string[] brands, ThreatType[] threats)`
 
 ## Available events
 - EventHandler\<LiveScan> `UrlScanned`
