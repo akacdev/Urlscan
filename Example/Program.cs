@@ -13,7 +13,7 @@ namespace Example
         public static readonly string Sid = Environment.GetEnvironmentVariable("SID");
 
         public static async Task Main()
-        {
+        {    
             if (string.IsNullOrEmpty(Key))
             {
                 Console.WriteLine($"No API key has been configured. Please set one as the \"KEY\" environment variable.");

@@ -27,7 +27,7 @@ namespace Urlscan
         /// <summary>
         /// How many times result polling should be retried.
         /// </summary>
-        private const int MaxRetries = 10;
+        private const int MaxRetries = 20;
 
         private readonly HttpClientHandler HttpHandler = new()
         {
@@ -54,9 +54,11 @@ namespace Urlscan
             Sid = sid;
             UsesAccountSID = sid is not null;
 
-            Client = new(HttpHandler);
+            Client = new(HttpHandler)
+            {
+                DefaultRequestVersion = new Version(2, 0)
+            };
 
-            Client.DefaultRequestVersion = new Version(2, 0);
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Client - actually-akac/Urlscan");
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
@@ -183,10 +185,9 @@ namespace Urlscan
             while (retries < MaxRetries)
             {
                 res = await GetResult(uuid);
-
                 if (res is not null) return res;
-                else await Task.Delay(interval);
-
+                
+                await Task.Delay(interval);
                 retries++;
             }
 
