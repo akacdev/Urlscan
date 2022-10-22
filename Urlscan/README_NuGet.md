@@ -5,7 +5,8 @@
 🔎 An async and lightweight C# library for interacting with the Urlscan API.
 
 ## Usage
-Available on NuGet as `Urlscan`, methods can be found under the classes `UrlscanClient` and `LiveClient`.<br>
+Available on NuGet as `Urlscan`, methods can be found under the classes `UrlscanClient` and `LiveClient`.
+
 https://www.nuget.org/packages/Urlscan
 
 ### Obtaining API keys
@@ -120,5 +121,6 @@ await client.AddVerdict(new VerdictParameters()
 - EventHandler\<LiveScan> `UrlScanned`
 
 ## Official Links
-https://urlscan.io</br>
+https://urlscan.io
+
 https://twitter.com/urlscanio

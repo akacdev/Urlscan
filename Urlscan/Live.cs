@@ -43,8 +43,8 @@ namespace Urlscan
         /// <summary>
         /// Create a new instance of the client for polling live results.
         /// </summary>
-        /// <param name="pollInterval">How often newly created scans should be retrieved, in milliseconds.</param>
-        /// <param name="pollSize"></param>
+        /// <param name="interval">How often newly created scans should be retrieved, in milliseconds.</param>
+        /// <param name="size"></param>
         public LiveClient(int interval = 30000, int size = 100)
         {
             if (interval < 3000) throw new ArgumentOutOfRangeException(nameof(interval), "Poll interval has to be at least 3000ms.");
