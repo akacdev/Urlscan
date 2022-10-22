@@ -57,7 +57,7 @@ namespace Urlscan
         public string UUID { get; set; }
 
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public string URL { get; set; }
 
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
@@ -90,28 +90,28 @@ namespace Urlscan
         public string Server { get; set; }
 
         [JsonPropertyName("ip")]
-        public string Ip { get; set; }
+        public string IP { get; set; }
 
         [JsonPropertyName("mimeType")]
-        public string MimeType { get; set; }
+        public string MIMEType { get; set; }
 
         [JsonPropertyName("title")]
         public string Title { get; set; }
 
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public string URL { get; set; }
 
         [JsonPropertyName("tlsValidDays")]
-        public int TlsValidDays { get; set; }
+        public int TLSValidDays { get; set; }
 
         [JsonPropertyName("tlsAgeDays")]
-        public int TlsAgeDays { get; set; }
+        public int TLSAgeDays { get; set; }
 
         [JsonPropertyName("ptr")]
-        public string Ptr { get; set; }
+        public string PTR { get; set; }
 
         [JsonPropertyName("tlsValidFrom")]
-        public DateTime TlsValidFrom { get; set; }
+        public DateTime TLSValidFrom { get; set; }
 
         [JsonPropertyName("domain")]
         public string Domain { get; set; }
@@ -123,13 +123,13 @@ namespace Urlscan
         public string ApexDomain { get; set; }
 
         [JsonPropertyName("asnname")]
-        public string Asnname { get; set; }
+        public string ASNName { get; set; }
 
         [JsonPropertyName("asn")]
-        public string Asn { get; set; }
+        public string ASN { get; set; }
 
         [JsonPropertyName("tlsIssuer")]
-        public string TlsIssuer { get; set; }
+        public string TLSIssuer { get; set; }
 
         [JsonPropertyName("status")]
         public string Status { get; set; }

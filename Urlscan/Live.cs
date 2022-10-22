@@ -9,15 +9,12 @@ using System.Timers;
 namespace Urlscan
 {
     /// <summary>
-    /// A secondary API client specifically for the /json/live endpoint. This polls the API every few seconds and delivers you newly created scans through events.
+    /// The secondary API client specifically for the live scans endpoint.<br/>
+    /// This polls the API on regular intervals and delivers you newly created scans through events.<br/>
+    /// Primairly meant to be used by people who wish to process newly created scans for their own phishing threat intelligence.
     /// </summary>
     public class LiveClient
     {
-        /// <summary>
-        /// The base API url.
-        /// </summary>
-        public const string URL = "https://urlscan.io";
-
         private readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All
@@ -50,7 +47,7 @@ namespace Urlscan
         /// <param name="pollSize"></param>
         public LiveClient(int interval = 30000, int size = 100)
         {
-            if (interval < 3000) throw new ArgumentOutOfRangeException(nameof(interval), "Poll interval has to be at least 3000 ms.");
+            if (interval < 3000) throw new ArgumentOutOfRangeException(nameof(interval), "Poll interval has to be at least 3000ms.");
             if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Poll size has to be at least 1.");
 
             Interval = interval;
@@ -59,7 +56,9 @@ namespace Urlscan
             Seen = new(Size);
             Client = new(HttpHandler)
             {
-                DefaultRequestVersion = new Version(2, 0),
+                BaseAddress = UrlscanClient.BaseURI,
+                Timeout = UrlscanClient.Timeout,
+                DefaultRequestVersion = UrlscanClient.HttpVersion
             };
 
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
@@ -105,17 +104,19 @@ namespace Urlscan
         /// <exception cref="Exception"></exception>
         private async Task Poll()
         {
-            HttpResponseMessage res = await Client.Request($"{URL}/json/live?size={Size}", HttpMethod.Get);
-            if (res.StatusCode != HttpStatusCode.OK)
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"json/live?size={Size}", absoluteUrl: true);
+
+            if (res.StatusCode == HttpStatusCode.OK) FailedRequests = 0;
+            else
             {
                 FailedRequests++;
+
                 if (FailedRequests >= 5)
                 {
                     Stop();
                     throw new Exception($"Urlscan is likely having some issues right now, disabling Live polling.");
                 }
-            }
-            else FailedRequests = 0;
+            } 
 
             LiveContainer cont = await res.Deseralize<LiveContainer>();
 

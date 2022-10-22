@@ -3,22 +3,30 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <PackageId>Urlscan</PackageId>
-    <Version>1.1.2</Version>
+    <Product>Urlscan</Product>
+    <Version>1.2.2</Version>
+    <AssemblyVersion>1.2.2</AssemblyVersion>
+    <FileVersion>1.2.2</FileVersion>
     <Authors>akac</Authors>
     <Company>akac</Company>
-    <Product>Urlscan</Product>
-    <Description>A C# library for interacting with the Urlscan API </Description>
+    <Description>An async and lightweight C# library for interacting with the Urlscan API.</Description>
+    <PackageTags>urlscan; url-scan; url; scan; ioc; ip; domain; screenshot; phishing; malware; link; suspicious; check</PackageTags>
     <PackageProjectUrl>https://github.com/actually-akac/Urlscan</PackageProjectUrl>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/actually-akac/Urlscan</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>url, api, ioc, screenshot, phishing, link, suspicious, urlscan, url-scan</PackageTags>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>1.1.2</AssemblyVersion>
-    <FileVersion>1.1.2</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageIcon>icon.png</PackageIcon>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

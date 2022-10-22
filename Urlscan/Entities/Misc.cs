@@ -24,7 +24,7 @@ namespace Urlscan
         SE,
         FI,
         DK,
-        NO,
+        NO
     }
 
     public enum LimitType

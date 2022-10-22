@@ -77,7 +77,7 @@ namespace Urlscan
     public class Page
     {
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public string URL { get; set; }
 
         [JsonPropertyName("domain")]
         public string Domain { get; set; }
@@ -95,10 +95,10 @@ namespace Urlscan
         public string IP { get; set; }
 
         [JsonPropertyName("asn")]
-        public string Asn { get; set; }
+        public string ASN { get; set; }
 
         [JsonPropertyName("asnname")]
-        public string AsnName { get; set; }
+        public string ASNName { get; set; }
     }
 
     public class Lists
@@ -167,7 +167,7 @@ namespace Urlscan
         public GeoIPProcessor GeoIP { get; set; }
 
         [JsonPropertyName("asn")]
-        public AsnProcessor Asn { get; set; }
+        public AsnProcessor ASN { get; set; }
 
         [JsonPropertyName("wappa")]
         public WappaProcessor Wappa { get; set; }
@@ -218,7 +218,7 @@ namespace Urlscan
         public string City { get; set; }
 
         [JsonPropertyName("ll")]
-        public double[] Ll { get; set; }
+        public double[] LL { get; set; }
 
         [JsonPropertyName("country_name")]
         public string CountryName { get; set; }
@@ -230,10 +230,10 @@ namespace Urlscan
     public class AsnProcessor
     {
         [JsonPropertyName("data")]
-        public Asn[] Data { get; set; }
+        public ASN[] Data { get; set; }
     }
 
-    public class Asn
+    public class ASN
     {
         [JsonPropertyName("ip")]
         public string IP { get; set; }
@@ -314,7 +314,7 @@ namespace Urlscan
         public ProtocolStats[] Protocol { get; set; }
 
         [JsonPropertyName("tlsStats")]
-        public TLSStats[] Tls { get; set; }
+        public TLSStats[] TLSStats { get; set; }
 
         [JsonPropertyName("serverStats")]
         public ServerStats[] Server { get; set; }
@@ -527,7 +527,7 @@ namespace Urlscan
         public string IP { get; set; }
 
         [JsonPropertyName("asn")]
-        public Asn Asn { get; set; }
+        public ASN ASN { get; set; }
 
         [JsonPropertyName("geoip")]
         public GeoIP GeoIP { get; set; }
@@ -560,24 +560,24 @@ namespace Urlscan
         public DataRequest[] Requests { get; set; }
 
         [JsonPropertyName("cookies")]
-        public object _items
+        public object Items
         {
             get
             {
-                return Items;
+                return ItemsData;
             }
 
             set
             {
                 if (((JsonElement)value).ValueKind.ToString() == "Array")
                 {
-                    Items = ((JsonElement)value).Deserialize<DataCookie[]>();
+                    ItemsData = ((JsonElement)value).Deserialize<DataCookie[]>();
                 }
             }
         }
 
         [JsonIgnore]
-        public DataCookie[] Items { get; set; }
+        public DataCookie[] ItemsData { get; set; }
 
         [JsonPropertyName("console")]
         public DataConsole[] Console { get; set; }
@@ -898,7 +898,7 @@ namespace Urlscan
         public int Size { get; set; }
 
         [JsonPropertyName("asn")]
-        public Asn Asn { get; set; }
+        public ASN ASN { get; set; }
 
         [JsonPropertyName("geoip")]
         public GeoIP GeoIP { get; set; }
@@ -907,7 +907,7 @@ namespace Urlscan
     public class InnerResponse
     {
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public string URL { get; set; }
 
         [JsonPropertyName("status")]
         public int Status { get; set; }
@@ -919,7 +919,7 @@ namespace Urlscan
         public Dictionary<string, string> Headers { get; set; }
 
         [JsonPropertyName("mimeType")]
-        public string MimeType { get; set; }
+        public string MIMEType { get; set; }
 
         [JsonPropertyName("remoteIPAddress")]
         public string RemoteIPAddress { get; set; }
