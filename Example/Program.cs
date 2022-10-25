@@ -67,7 +67,7 @@ namespace Example
                     Visibility = Visibility.Public
                 });
             }
-            catch (NXDOMAINException ex)
+            catch (NxDomainException ex)
             {
                 Console.WriteLine($"The domain doesn't have any DNS records.\nUrlscan Message: {ex.Message}");
                 Console.ReadKey();
@@ -95,9 +95,9 @@ namespace Example
 
             Console.WriteLine($"Result URL: {res.Task.ReportUrl}");
             Console.WriteLine($"Screenshot URL: {res.Task.ScreenshotUrl}");
-            Console.WriteLine($"DOM view URL: {res.Task.DomUrl}\n");
+            Console.WriteLine($"DOM view URL: {res.Task.DOMUrl}\n");
 
-            Console.WriteLine($"Final URL: {res.Page.URL} on domain {res.Page.Domain}");
+            Console.WriteLine($"Final URL: {res.Page.Url} on domain {res.Page.Domain}");
             Console.WriteLine($"This page has the IP address {res.Page.IP} hosted at IP {res.Page.IP} ({res.Page.ASNName}) from {res.Page.Country}");
             Console.WriteLine($"The server software was identified as {res.Page.Server}\n");
 
@@ -168,10 +168,10 @@ namespace Example
                 Console.WriteLine("Press any key to search for scans that contain hypesquad in them.");
                 Console.ReadKey();
 
-                SearchResult[] scans = await client.Search("page.status:200 AND domain.keyword:*hypesquad*", 10);
-                foreach (SearchResult scan in scans)
+                SearchItem[] scans = await client.Search("page.status:200 AND domain.keyword:*hypesquad*", 10);
+                foreach (SearchItem scan in scans)
                 {
-                    Console.WriteLine(scan.Page.URL[..Math.Min(scan.Page.URL.Length, 50)]);
+                    Console.WriteLine(scan.Page.Url[..Math.Min(scan.Page.Url.Length, 50)]);
                 }
             }
             
@@ -181,7 +181,7 @@ namespace Example
             LiveClient live = new(1000 * 3, 10);
             live.UrlScanned += (sender, scan) =>
             {
-                Console.WriteLine(scan.Task.URL[..Math.Min(scan.Task.URL.Length, 50)]);
+                Console.WriteLine(scan.Task.Url[..Math.Min(scan.Task.Url.Length, 50)]);
             };
 
             Console.WriteLine("Demo finished, press any key to exit.");

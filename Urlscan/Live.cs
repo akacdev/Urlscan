@@ -56,7 +56,7 @@ namespace Urlscan
             Seen = new(Size);
             Client = new(HttpHandler)
             {
-                BaseAddress = UrlscanClient.BaseURI,
+                BaseAddress = UrlscanClient.BaseUri,
                 Timeout = UrlscanClient.Timeout,
                 DefaultRequestVersion = UrlscanClient.HttpVersion
             };

@@ -32,8 +32,9 @@ namespace Urlscan
             object obj,
             HttpStatusCode target = HttpStatusCode.OK,
             JsonSerializerOptions options = null,
-            string sid = null)
-        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj, options ?? Constants.JsonOptions), Encoding.UTF8, Constants.JSONContentType), target, sid);
+            string sid = null,
+            bool absoluteUrl = false)
+        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj, options ?? Constants.JsonOptions), Encoding.UTF8, Constants.JsonContentType), target, sid, absoluteUrl);
 
         public static async Task<HttpResponseMessage> Request
         (
@@ -66,6 +67,17 @@ namespace Urlscan
                 else await Task.Delay(RetryDelay);
             }
 
+            if (retries == MaxRetries)
+            {
+                string text = await res.Content.ReadAsStringAsync();
+                string preview = text[..Math.Min(text.Length, PreviewMaxLength)];
+
+                throw new UrlscanException(
+                    $"Ran out of retry attempts while requesting {method} {url}, last status code: {res.StatusCode}" +
+                    $"\nPreview:" +
+                    $"\n{preview}");
+            }
+
             if (!target.HasFlag(res.StatusCode))
             {
                 if (res.StatusCode == HttpStatusCode.TooManyRequests)
@@ -84,7 +96,7 @@ namespace Urlscan
 
                         throw err.Message switch
                         {
-                            "DNS Error - Could not resolve domain" => new NXDOMAINException(err.Description),
+                            "DNS Error - Could not resolve domain" => new NxDomainException(err.Description),
                             "Don't be silly now ..." => new SillyException(err.Description),
                             _ => new UrlscanException($"Request resulted in the error \"{err.Description}\" with message \"{err.Message}\""),
                         };
@@ -94,18 +106,16 @@ namespace Urlscan
                         throw new UrlscanException($"Requested resulted in a 400 Bad Request, and could not be parsed into JSON. Preview:\n{preview}");
                     }
                 }
-            }
+                else
+                {
+                    string text = await res.Content.ReadAsStringAsync();
+                    string preview = text[..Math.Min(text.Length, PreviewMaxLength)];
 
-            retries++;
-            if (retries == MaxRetries)
-            {
-                string text = await res.Content.ReadAsStringAsync();
-                string preview = text[..Math.Min(text.Length, PreviewMaxLength)];
-
-                throw new UrlscanException(
-                    $"Ran out of retry attempts while requesting {method} {url}, last status code: {res.StatusCode}" +
+                    throw new UrlscanException(
+                    $"Failed to request {method} {url}, received the following status code: {res.StatusCode}" +
                     $"\nPreview:" +
                     $"\n{preview}");
+                }
             }
 
             return res;

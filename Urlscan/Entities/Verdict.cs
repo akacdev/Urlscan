@@ -4,17 +4,8 @@ namespace Urlscan
 {
     public class VerdictParameters
     {
-        [JsonPropertyName("verdict")]
-        public VerdictType Verdict { get; set; }
-
-        [JsonPropertyName("comment")]
-        public string Comment { get; set; }
-
-        [JsonPropertyName("threatTypes")]
-        public ThreatType[] ThreatTypes { get; set; }
-
-        [JsonPropertyName("brands")]
-        public string[] Brands { get; set; }
+        [JsonPropertyName("uuid")]
+        public string UUID { get; set; }
 
         [JsonPropertyName("scope")]
         public VerdictScope Scope { get; set; }
@@ -22,8 +13,17 @@ namespace Urlscan
         [JsonPropertyName("scopeValue")]
         public string ScopeValue { get; set; }
 
-        [JsonPropertyName("uuid")]
-        public string UUID { get; set; }
+        [JsonPropertyName("comment")]
+        public string Comment { get; set; }
+
+        [JsonPropertyName("brands")]
+        public string[] Brands { get; set; }
+
+        [JsonPropertyName("verdict")]
+        public VerdictType Verdict { get; set; }
+
+        [JsonPropertyName("threatTypes")]
+        public ThreatType[] ThreatTypes { get; set; }
 
         [JsonPropertyName("type")]
         public string Type { get; } = "verdict";

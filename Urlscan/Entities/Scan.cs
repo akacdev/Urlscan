@@ -2,6 +2,25 @@
 
 namespace Urlscan
 {
+    /// <summary>
+    /// Determines how a scan was submitted.
+    /// </summary>
+    public enum SubmissionMethod
+    {
+        /// <summary>
+        /// Indicates that the scan has been submitted manually through a browser.
+        /// </summary>
+        Manual,
+        /// <summary>
+        /// Indicates that the scan has been submitted through an API request.
+        /// </summary>
+        API,
+        /// <summary>
+        /// Indicates that the scan has been submitted through implemented automated sources, such as <b>Phishtank</b> or <b>OpenPhish</b>.
+        /// </summary>
+        Automatic
+    }
+
     public class ScanParameters
     {
         [JsonPropertyName("url")]
@@ -47,7 +66,7 @@ namespace Urlscan
         public SubmissionOptions Options { get; set; }
 
         [JsonPropertyName("url")]
-        public string URL { get; set; }
+        public string Url { get; set; }
 
         [JsonPropertyName("country")]
         public string Country { get; set; }

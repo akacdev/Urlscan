@@ -23,12 +23,12 @@ namespace Urlscan
         /// <summary>
         /// The base URL to use when communicating.
         /// </summary>
-        public const string BaseURL = "https://urlscan.io/";
+        public const string BaseUrl = "https://urlscan.io/";
 
         /// <summary>
         /// The base URI to use when communicating.
         /// </summary>
-        public static readonly Uri BaseURI = new(BaseURL);
+        public static readonly Uri BaseUri = new(BaseUrl);
 
         /// <summary>
         /// The HTTP request version to use when communicating.
@@ -73,7 +73,7 @@ namespace Urlscan
 
             Client = new(HttpHandler)
             {
-                BaseAddress = BaseURI,
+                BaseAddress = BaseUri,
                 DefaultRequestVersion = HttpVersion,
                 Timeout = Timeout
             };
@@ -350,7 +350,7 @@ namespace Urlscan
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <exception cref="UnauthorizedException"></exception>
-        public async Task<SearchResult[]> Search(string query, int amount = 100)
+        public async Task<SearchItem[]> Search(string query, int amount = 100)
         {
             if (string.IsNullOrEmpty(query)) throw new ArgumentNullException(nameof(query), "Search query is null or empty.");
             if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be a positive value.");
@@ -359,14 +359,14 @@ namespace Urlscan
             string searchAfter = null;
             int chunk = (amount > 10000) ? 10000 : amount;
 
-            List<SearchResult> results = new(amount);
+            List<SearchItem> results = new(amount);
 
             while (results.Count < amount)
             {
                 if ((amount - results.Count) < chunk) chunk = amount - results.Count;
 
                 HttpResponseMessage res = await Client.Request(HttpMethod.Get,
-                    $"api/v{Version}/search/?q={query}&size={chunk}{(searchAfter is not null ? $"&search_after={searchAfter}" : "")}");
+                    $"search/?q={query}&size={chunk}{(searchAfter is not null ? $"&search_after={searchAfter}" : "")}");
 
                 SearchContainer cont = await res.Deseralize<SearchContainer>();
                 if (!cont.HasMore || cont.Results.Length == 0) return cont.Results;
@@ -402,7 +402,7 @@ namespace Urlscan
             string scopeValue = scope switch
             { 
                 VerdictScope.PageDomain => result.Page.Domain,
-                VerdictScope.PageUrl => result.Page.URL,
+                VerdictScope.PageUrl => result.Page.Url,
                 _ => throw new NotImplementedException($"{scope} is an unknown verdict scope.")
             };
 
@@ -463,15 +463,15 @@ namespace Urlscan
 
             parameters.Brands = parameters.Brands.Select(x => x.ToLower()).ToArray();
 
-            await Client.Request(HttpMethod.Post, "result/verdict/", parameters, sid: Sid);
+            await Client.Request(HttpMethod.Post, "result/verdict/", parameters, options: Constants.VerdictJsonOptions, sid: Sid, absoluteUrl: true);
         }
 
         public async Task<SimilarScan[]> GetSimilarScans(string uuid)
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "UUID of the result to find similar scans for is null or empty.");
 
-            if (Client.DefaultRequestHeaders.Accept.All(x => x.MediaType != Constants.HTMLContentType))
-                Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.HTMLContentType);
+            if (Client.DefaultRequestHeaders.Accept.All(x => x.MediaType != Constants.HtmlContentType))
+                Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.HtmlContentType);
 
             HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"result/{uuid}/related/", sid: Sid, absoluteUrl: true);
             string html = await res.Content.ReadAsStringAsync();
@@ -523,7 +523,7 @@ namespace Urlscan
                 int titleEnd = targetLine.IndexOf(titleTo, titleStart);
                 if (titleEnd == -1) throw new UrlscanException(string.Concat(prefix, $"cannot find the end of the 'title' attribute at index {i}"));
 
-                scan.URL = targetLine[titleStart..titleEnd];
+                scan.Url = targetLine[titleStart..titleEnd];
 
                 scans[i] = scan;
             }

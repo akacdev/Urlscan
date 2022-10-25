@@ -3,7 +3,7 @@
 namespace Urlscan
 {
     public class UrlscanException : Exception { public UrlscanException(string message) : base(message) { } }
-    public class NXDOMAINException : Exception { public NXDOMAINException(string message) : base(message) { } }
+    public class NxDomainException : Exception { public NxDomainException(string message) : base(message) { } }
     public class SillyException : Exception { public SillyException(string message) : base(message) { } }
     public class UnauthorizedException : Exception
     {

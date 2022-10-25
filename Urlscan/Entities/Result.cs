@@ -20,25 +20,25 @@ namespace Urlscan
         public ScanTask Task { get; set; }
 
         [JsonPropertyName("page")]
-        public Page Page { get; set; }
+        public BasicScanPage Page { get; set; }
 
         [JsonPropertyName("meta")]
-        public Meta Meta { get; set; }
+        public ScanMeta Meta { get; set; }
 
         [JsonPropertyName("lists")]
-        public Lists Lists { get; set; }
+        public ScanLists Lists { get; set; }
 
         [JsonPropertyName("stats")]
-        public ResultStats Stats { get; set; }
+        public ScanStats Stats { get; set; }
 
         [JsonPropertyName("data")]
-        public ResultData Data { get; set; }
+        public ScanData Data { get; set; }
 
         [JsonPropertyName("verdicts")]
-        public Verdicts Verdicts { get; set; }
+        public ScanVerdicts Verdicts { get; set; }
 
         [JsonPropertyName("submitter")]
-        public Submitter Submitter { get; set; }
+        public ScanSubmitter Submitter { get; set; }
     }
 
     public class ScanTask
@@ -46,23 +46,32 @@ namespace Urlscan
         [JsonPropertyName("uuid")]
         public string UUID { get; set; }
 
-        [JsonPropertyName("time")]
-        public DateTime Time { get; set; }
-
         [JsonPropertyName("url")]
         public string Url { get; set; }
 
+        [JsonPropertyName("domain")]
+        public string Domain { get; set; }
+
+        [JsonPropertyName("apexDomain")]
+        public string ApexDomain { get; set; }
+
         [JsonPropertyName("visibility")]
-        public string Visibility { get; set; }
+        public Visibility Visibility { get; set; }
 
         [JsonPropertyName("method")]
-        public string Method { get; set; }
+        public SubmissionMethod Method { get; set; }
 
-        [JsonPropertyName("source")]
-        public string Source { get; set; }
+        [JsonPropertyName("time")]
+        public DateTime Time { get; set; }
 
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
+
+        /// <summary>
+        /// Only available when directly fetching a result.
+        /// </summary>
+        [JsonPropertyName("source")]
+        public string Source { get; set; }
 
         [JsonPropertyName("reportURL")]
         public string ReportUrl { get; set; }
@@ -71,13 +80,13 @@ namespace Urlscan
         public string ScreenshotUrl { get; set; }
 
         [JsonPropertyName("domURL")]
-        public string DomUrl { get; set; }
+        public string DOMUrl { get; set; }
     }
 
-    public class Page
+    public class BasicScanPage
     {
         [JsonPropertyName("url")]
-        public string URL { get; set; }
+        public string Url { get; set; }
 
         [JsonPropertyName("domain")]
         public string Domain { get; set; }
@@ -101,7 +110,62 @@ namespace Urlscan
         public string ASNName { get; set; }
     }
 
-    public class Lists
+    public class ScanPage
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("ip")]
+        public string IP { get; set; }
+
+        [JsonPropertyName("country")]
+        public string Country { get; set; }
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("server")]
+        public string Server { get; set; }
+
+        [JsonPropertyName("mimeType")]
+        public string MimeType { get; set; }
+
+        [JsonPropertyName("tlsIssuer")]
+        public string TLSIssuer { get; set; }
+
+        [JsonPropertyName("tlsValidDays")]
+        public int TLSValidDays { get; set; }
+
+        [JsonPropertyName("tlsAgeDays")]
+        public int TLSAgeDays { get; set; }
+
+        [JsonPropertyName("tlsValidFrom")]
+        public DateTime TLSValidFrom { get; set; }
+
+        [JsonPropertyName("ptr")]
+        public string PTR { get; set; }
+
+        [JsonPropertyName("domain")]
+        public string Domain { get; set; }
+
+        [JsonPropertyName("umbrellaRank")]
+        public int UmbrellaRank { get; set; }
+
+        [JsonPropertyName("apexDomain")]
+        public string ApexDomain { get; set; }
+
+        [JsonPropertyName("asnname")]
+        public string ASNName { get; set; }
+
+        [JsonPropertyName("asn")]
+        public string ASN { get; set; }
+
+        [JsonConverter(typeof(StringIntConverter))]
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+    }
+
+    public class ScanLists
     {
         [JsonPropertyName("ips")]
         public string[] IPs { get; set; }
@@ -139,20 +203,16 @@ namespace Urlscan
         [JsonPropertyName("issuer")]
         public string Issuer { get; set; }
 
+        [JsonConverter(typeof(LongUnixConverter))]
         [JsonPropertyName("validFrom")]
-        public int ValidFrom { get; set; }
+        public DateTime ValidFrom { get; set; }
 
+        [JsonConverter(typeof(LongUnixConverter))]
         [JsonPropertyName("validTo")]
-        public int ValidTo { get; set; }
+        public DateTime ValidTo { get; set; }
     }
 
-    public class Submitter
-    {
-        [JsonPropertyName("country")]
-        public string Country { get; set; }
-    }
-
-    public class Meta
+    public class ScanMeta
     {
         [JsonPropertyName("processors")]
         public Processors Processors { get; set; }
@@ -167,7 +227,7 @@ namespace Urlscan
         public GeoIPProcessor GeoIP { get; set; }
 
         [JsonPropertyName("asn")]
-        public AsnProcessor ASN { get; set; }
+        public ASNProcessor ASN { get; set; }
 
         [JsonPropertyName("wappa")]
         public WappaProcessor Wappa { get; set; }
@@ -227,7 +287,7 @@ namespace Urlscan
         public int Metro { get; set; }
     }
 
-    public class AsnProcessor
+    public class ASNProcessor
     {
         [JsonPropertyName("data")]
         public ASN[] Data { get; set; }
@@ -235,11 +295,11 @@ namespace Urlscan
 
     public class ASN
     {
+        [JsonPropertyName("asn")]
+        public string Value { get; set; }
+
         [JsonPropertyName("ip")]
         public string IP { get; set; }
-
-        [JsonPropertyName("asn")]
-        public string AsnValue { get; set; }
 
         [JsonPropertyName("country")]
         public string Country { get; set; }
@@ -305,7 +365,25 @@ namespace Urlscan
         public string Pattern { get; set; }
     }
 
-    public class ResultStats
+    public class BasicScanStats
+    {
+        [JsonPropertyName("uniqIPs")]
+        public int UniqueIPCount { get; set; }
+
+        [JsonPropertyName("uniqCountries")]
+        public int UniqueCountryCount { get; set; }
+
+        [JsonPropertyName("requests")]
+        public int RequestCount { get; set; }
+
+        [JsonPropertyName("dataLength")]
+        public int DataLength { get; set; }
+
+        [JsonPropertyName("encodedDataLength")]
+        public int EncodedDataLength { get; set; }
+    }
+
+    public class ScanStats
     {
         [JsonPropertyName("resourceStats")]
         public ResourceStats[] Resource { get; set; }
@@ -335,7 +413,7 @@ namespace Urlscan
         public int? IPv6Percentage { get; set; }
 
         [JsonPropertyName("uniqCountries")]
-        public int UniqCountries { get; set; }
+        public int UniqueCountryCount { get; set; }
 
         [JsonPropertyName("totalLinks")]
         public int TotalLinks { get; set; }
@@ -554,7 +632,7 @@ namespace Urlscan
         public int Count { get; set; }
     }
 
-    public class ResultData
+    public class ScanData
     {
         [JsonPropertyName("requests")]
         public DataRequest[] Requests { get; set; }
@@ -564,20 +642,20 @@ namespace Urlscan
         {
             get
             {
-                return ItemsData;
+                return _items;
             }
 
             set
             {
                 if (((JsonElement)value).ValueKind.ToString() == "Array")
                 {
-                    ItemsData = ((JsonElement)value).Deserialize<DataCookie[]>();
+                    _items = ((JsonElement)value).Deserialize<DataCookie[]>();
                 }
             }
         }
 
         [JsonIgnore]
-        public DataCookie[] ItemsData { get; set; }
+        private DataCookie[] _items;
 
         [JsonPropertyName("console")]
         public DataConsole[] Console { get; set; }
@@ -721,10 +799,10 @@ namespace Urlscan
         public double ProxyEnd { get; set; }
 
         [JsonPropertyName("dnsStart")]
-        public double DnsStart { get; set; }
+        public double DNSStart { get; set; }
 
         [JsonPropertyName("dnsEnd")]
-        public double DnsEnd { get; set; }
+        public double DNSEnd { get; set; }
 
         [JsonPropertyName("connectStart")]
         public double ConnectStart { get; set; }
@@ -733,10 +811,10 @@ namespace Urlscan
         public double ConnectEnd { get; set; }
 
         [JsonPropertyName("sslStart")]
-        public double SslStart { get; set; }
+        public double SSLStart { get; set; }
 
         [JsonPropertyName("sslEnd")]
-        public double SslEnd { get; set; }
+        public double SSLEnd { get; set; }
 
         [JsonPropertyName("workerStart")]
         public double WorkerStart { get; set; }
@@ -792,11 +870,13 @@ namespace Urlscan
         [JsonPropertyName("issuer")]
         public string Issuer { get; set; }
 
+        [JsonConverter(typeof(LongUnixConverter))]
         [JsonPropertyName("validFrom")]
-        public long ValidFrom { get; set; }
+        public DateTime ValidFrom { get; set; }
 
+        [JsonConverter(typeof(LongUnixConverter))]
         [JsonPropertyName("validTo")]
-        public long ValidTo { get; set; }
+        public DateTime ValidTo { get; set; }
 
         [JsonPropertyName("certificateTransparencyCompliance")]
         public string CertificateTransparencyCompliance { get; set; }
@@ -949,7 +1029,7 @@ namespace Urlscan
         public SecurityHeader[] SecurityHeaders { get; set; }
     }
 
-    public class Verdicts
+    public class ScanVerdicts
     {
         [JsonPropertyName("overall")]
         public OverallVerdict Overall { get; set; }
@@ -982,7 +1062,7 @@ namespace Urlscan
         public bool HasVerdicts { get; set; }
 
         [JsonPropertyName("lastVerdict")]
-        public DateTime LastVerdict { get; set; }
+        public DateTime? LastVerdict { get; set; }
     }
 
     public class UrlscanVerdict
@@ -1033,7 +1113,7 @@ namespace Urlscan
         public bool HasVerdicts { get; set; }
 
         [JsonPropertyName("lastVerdict")]
-        public DateTime LastVerdict { get; set; }
+        public DateTime? LastVerdict { get; set; }
     }
 
     public class Brand
@@ -1049,5 +1129,11 @@ namespace Urlscan
 
         [JsonPropertyName("vertical")]
         public string[] Vertical { get; set; }
+    }
+
+    public class ScanSubmitter
+    {
+        [JsonPropertyName("country")]
+        public string Country { get; set; }
     }
 }

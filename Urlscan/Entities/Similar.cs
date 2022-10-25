@@ -8,6 +8,6 @@ namespace Urlscan
         public string UUID { get; set; }
 
         [JsonPropertyName("url")]
-        public string URL { get; set; }
+        public string Url { get; set; }
     }
 }

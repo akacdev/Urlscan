@@ -2,10 +2,52 @@
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Urlscan
 {
-    public class EnumNamingPolicy : JsonNamingPolicy
+    public class LongUnixConverter : JsonConverter<DateTime>
+    {
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(Convert.ToInt64(value));
+        }
+
+        public override DateTime Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.Number => reader.GetInt64().ToDate(),
+                _ => throw new JsonException(),
+            };
+        }
+
+    }
+
+    public class StringIntConverter : JsonConverter<int>
+    {
+        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(Convert.ToInt32(value));
+        }
+
+        public override int Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.String => int.Parse(reader.GetString()),
+                _ => throw new JsonException(),
+            };
+        }
+
+    }
+
+    public class KebabCaseNamingPolicy : JsonNamingPolicy
+    {
+        public override string ConvertName(string name) => name.ToKebabCase();
+    }
+
+    public class LowerCaseNamingPolicy : JsonNamingPolicy
     {
         public override string ConvertName(string name) => name.ToLower();
     }

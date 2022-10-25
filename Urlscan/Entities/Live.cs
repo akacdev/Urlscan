@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Urlscan
 {
@@ -21,120 +20,18 @@ namespace Urlscan
     public class LiveScan
     {
         [JsonPropertyName("task")]
-        public LiveScanTask Task { get; set; }
+        public ScanTask Task { get; set; }
 
         [JsonPropertyName("stats")]
-        public LiveScanStats Stats { get; set; }
+        public BasicScanStats Stats { get; set; }
 
         [JsonPropertyName("page")]
-        public Page Page { get; set; }
+        public ScanPage Page { get; set; }
 
         [JsonPropertyName("result")]
-        public string Result { get; set; }
+        public string ResultUrl { get; set; }
 
         [JsonPropertyName("screenshot")]
-        public string Screenshot { get; set; }
-    }
-
-    public class LiveScanTask
-    {
-        [JsonPropertyName("visibility")]
-        public string Visibility { get; set; }
-
-        [JsonPropertyName("method")]
-        public string Method { get; set; }
-
-        [JsonPropertyName("domain")]
-        public string Domain { get; set; }
-
-        [JsonPropertyName("apexDomain")]
-        public string ApexDomain { get; set; }
-
-        [JsonPropertyName("time")]
-        public DateTime Time { get; set; }
-
-        [JsonPropertyName("uuid")]
-        public string UUID { get; set; }
-
-        [JsonPropertyName("url")]
-        public string URL { get; set; }
-
-        [JsonPropertyName("tags")]
-        public string[] Tags { get; set; }
-    }
-
-    public class LiveScanStats
-    {
-        [JsonPropertyName("uniqIPs")]
-        public int UniqIPs { get; set; }
-
-        [JsonPropertyName("uniqCountries")]
-        public int UniqCountries { get; set; }
-
-        [JsonPropertyName("dataLength")]
-        public int DataLength { get; set; }
-
-        [JsonPropertyName("encodedDataLength")]
-        public int EncodedDataLength { get; set; }
-
-        [JsonPropertyName("requests")]
-        public int Requests { get; set; }
-    }
-
-    public class LiveScanPage
-    {
-        [JsonPropertyName("country")]
-        public string Country { get; set; }
-
-        [JsonPropertyName("server")]
-        public string Server { get; set; }
-
-        [JsonPropertyName("ip")]
-        public string IP { get; set; }
-
-        [JsonPropertyName("mimeType")]
-        public string MIMEType { get; set; }
-
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-
-        [JsonPropertyName("url")]
-        public string URL { get; set; }
-
-        [JsonPropertyName("tlsValidDays")]
-        public int TLSValidDays { get; set; }
-
-        [JsonPropertyName("tlsAgeDays")]
-        public int TLSAgeDays { get; set; }
-
-        [JsonPropertyName("ptr")]
-        public string PTR { get; set; }
-
-        [JsonPropertyName("tlsValidFrom")]
-        public DateTime TLSValidFrom { get; set; }
-
-        [JsonPropertyName("domain")]
-        public string Domain { get; set; }
-
-        [JsonPropertyName("umbrellaRank")]
-        public int UmbrellaRank { get; set; }
-
-        [JsonPropertyName("apexDomain")]
-        public string ApexDomain { get; set; }
-
-        [JsonPropertyName("asnname")]
-        public string ASNName { get; set; }
-
-        [JsonPropertyName("asn")]
-        public string ASN { get; set; }
-
-        [JsonPropertyName("tlsIssuer")]
-        public string TLSIssuer { get; set; }
-
-        [JsonPropertyName("status")]
-        public string Status { get; set; }
-
-        [JsonPropertyName("redirected")]
-        public string Redirected { get; set; }
+        public string ScreenshotUrl { get; set; }
     }
 }
