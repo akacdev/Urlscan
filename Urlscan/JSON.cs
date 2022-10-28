@@ -10,7 +10,7 @@ namespace Urlscan
     {
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteNumberValue(Convert.ToInt64(value));
+            writer.WriteNumberValue(value.ToUnixSeconds());
         }
 
         public override DateTime Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
