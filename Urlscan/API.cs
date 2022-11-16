@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -52,7 +53,7 @@ namespace Urlscan
 
             while (retries < MaxRetries)
             {
-                HttpRequestMessage req = new(method, absoluteUrl ? url : $"api/v{UrlscanClient.Version}/{url}")
+                HttpRequestMessage req = new(method, absoluteUrl ? url : $"api/v{Constants.Version}/{url}")
                 {
                     Content = content
                 };
@@ -123,16 +124,19 @@ namespace Urlscan
 
         public static async Task<T> Deseralize<T>(this HttpResponseMessage res, JsonSerializerOptions options = null)
         {
-            string json = await res.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(json)) throw new UrlscanException("Response content is empty, can't parse as JSON.");
+            Stream stream = await res.Content.ReadAsStreamAsync();
+            if (stream.Length == 0) throw new UrlscanException("Response content is empty, can't parse as JSON.");
 
             try
             {
-                return JsonSerializer.Deserialize<T>(json, options ?? Constants.JsonOptions);
+                return await JsonSerializer.DeserializeAsync<T>(stream, options ?? Constants.JsonOptions);
             }
             catch (Exception ex)
             {
-                throw new($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nJSON preview: {json[..Math.Min(json.Length, PreviewMaxLength)]}");
+                using StreamReader sr = new(stream);
+                string text = await sr.ReadToEndAsync();
+
+                throw new($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nPreview: {text[..Math.Min(text.Length, PreviewMaxLength)]}");
             }
         }
     }

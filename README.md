@@ -9,8 +9,21 @@
 </div>
 
 ## Usage
-Available on NuGet as `Urlscan`, methods can be found under the classes `UrlscanClient` and `LiveClient`.<br>
-https://www.nuget.org/packages/Urlscan
+Provides an easy interface for interacting with the Urlscan API.
+
+You can use this library to automate your Urlscan submissions, search for existing scans, track newly submitted scans and analyse network activity of malicious websites.
+
+To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+```rust
+dotnet add package Urlscan
+```
+
+For the primary classes to become available, import the used namespace.
+```csharp
+using Urlscan;
+```
+
+Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ### Obtaining API keys
 > API keys can be created in the user section `Settings & API`
@@ -18,9 +31,9 @@ https://www.nuget.org/packages/Urlscan
 > Secure identifier SID cookies can be obtained from your browser's cookie storage. Make sure to only copy the value, without the name! 
 
 ## Features
-- Made with **.NET 6**
+- Built for **.NET 6** and **.NET 7**
 - Fully **async**
-- Extensive **documentation**
+- Extensive **XML documentation**
 - Coverage of the free API endpoints, including some user-only and beta routes  
 - **No external dependencies** (uses integrated HTTP and JSON)
 - **Custom exceptions** (`UrlscanException`) for advanced catching
@@ -29,9 +42,6 @@ https://www.nuget.org/packages/Urlscan
 - Scan suspicious URLs and submit verdicts on them
 - Download screenshots and page DOMs
 - Empower your threat intelligence with live scans through `LiveClient`
-
-## Example
-Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Code Samples
 
@@ -116,13 +126,13 @@ await client.AddVerdict(new VerdictParameters()
 - Task\<Stream> **LiveshotStream**(string url, int width = 1280, int height = 1024)
 - Task\<string> **DownloadDOM**(Result result)
 - Task\<string> **DownloadDOM**(string uuid)
-- Task\<Submission> **Scan**( string url, string[] tags = null, string userAgent = null, string referer = null, bool overrideSafety = false, Visibility visibility = Visibility.Public, ScanCountry country = ScanCountry.Auto )
+- Task\<Submission> **Scan**(string url, string[] tags = null, string userAgent = null, string referer = null, bool overrideSafety = false, Visibility visibility = Visibility.Public, ScanCountry country = ScanCountry.Auto)
 - Task\<Submission> **Scan**(ScanParameters parameters)
 - Task\<User> **GetCurrentUser**()
 
 ## Available Events
 - EventHandler\<LiveScan> `UrlScanned`
 
-## Official Links
-https://urlscan.io</br>
-https://twitter.com/urlscanio
+## References
+- https://urlscan.io
+- https://twitter.com/urlscanio

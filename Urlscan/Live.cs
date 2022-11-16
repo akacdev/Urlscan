@@ -15,12 +15,17 @@ namespace Urlscan
     /// </summary>
     public class LiveClient
     {
-        private readonly HttpClientHandler HttpHandler = new()
+        private static readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All
         };
 
-        private readonly HttpClient Client;
+        private readonly HttpClient Client = new(HttpHandler)
+        {
+            BaseAddress = UrlscanClient.BaseUri,
+            Timeout = Constants.Timeout,
+            DefaultRequestVersion = Constants.HttpVersion
+        };
 
         private EventHandler<LiveScan> Handler;
         public event EventHandler<LiveScan> UrlScanned
@@ -51,15 +56,9 @@ namespace Urlscan
             if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Poll size has to be at least 1.");
 
             Interval = interval;
-            Size = size;
 
+            Size = size;
             Seen = new(Size);
-            Client = new(HttpHandler)
-            {
-                BaseAddress = UrlscanClient.BaseUri,
-                Timeout = UrlscanClient.Timeout,
-                DefaultRequestVersion = UrlscanClient.HttpVersion
-            };
 
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Live Client - actually-akac/Urlscan");

@@ -16,41 +16,25 @@ namespace Urlscan
     public class UrlscanClient
     {
         /// <summary>
-        /// The API version to use when communicating.
-        /// </summary>
-        public const int Version = 1;
-
-        /// <summary>
-        /// The base URL to use when communicating.
-        /// </summary>
-        public const string BaseUrl = "https://urlscan.io/";
-
-        /// <summary>
         /// The base URI to use when communicating.
         /// </summary>
-        public static readonly Uri BaseUri = new(BaseUrl);
-
-        /// <summary>
-        /// The HTTP request version to use when communicating.
-        /// </summary>s
-        public static readonly Version HttpVersion = new(2, 0);
-
-        /// <summary>
-        /// The maximum duration to wait for a response from the server.
-        /// </summary>
-        public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
-
+        public static readonly Uri BaseUri = new("https://urlscan.io/");
         /// <summary>
         /// How many times result polling should be retried.
         /// </summary>
         private const int MaxPollingRetries = 20;
 
-        private readonly HttpClientHandler HttpHandler = new()
+        private static readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All
         };
 
-        private readonly HttpClient Client;
+        private readonly HttpClient Client = new(HttpHandler)
+        {
+            BaseAddress = BaseUri,
+            DefaultRequestVersion = Constants.HttpVersion,
+            Timeout = Constants.Timeout,
+        };
 
         private readonly string Key;
         private readonly string Sid;
@@ -71,15 +55,8 @@ namespace Urlscan
             Sid = sid;
             UsesAccountSID = sid is not null;
 
-            Client = new(HttpHandler)
-            {
-                BaseAddress = BaseUri,
-                DefaultRequestVersion = HttpVersion,
-                Timeout = Timeout
-            };
-
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Client - actually-akac/Urlscan");
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.UserAgent);
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             Client.DefaultRequestHeaders.Add("API-Key", Key);
         }
