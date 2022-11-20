@@ -2,7 +2,7 @@
 
 ![](https://raw.githubusercontent.com/actually-akac/Urlscan/master/Urlscan/icon.png)
 
-🔎 An async and lightweight C# library for interacting with the Urlscan API.
+### 🔎 An async and lightweight C# library for interacting with the Urlscan API.
 
 ## Usage
 Provides an easy interface for interacting with the Urlscan API.
@@ -115,7 +115,7 @@ await client.AddVerdict(new VerdictParameters()
 - Task\<Result> **GetResult**(string uuid)
 - Task\<Result> **Poll**(string uuid, int delay = 5000, int interval = 2000)
 - Task\<Result> **Poll**(Submission submission, int delay = 5000, int interval = 2000)
-- Task\<SearchResult[]> **Search**(string query, int amount = 100)
+- Task\<SearchItem[]> **Search**(string query, int amount = 100, string targetScan = null)
 - Task\<SimilarScan[]> **GetSimilarScans**(string uuid)
 - Task\<Stats> **GetStats**()
 - Task\<Stream> **DownloadScreenshotStream**(string uuid)

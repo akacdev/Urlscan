@@ -22,8 +22,7 @@ namespace Urlscan
 
         private readonly HttpClient Client = new(HttpHandler)
         {
-            BaseAddress = UrlscanClient.BaseUri,
-            Timeout = Constants.Timeout,
+            BaseAddress = Constants.BaseUri,
             DefaultRequestVersion = Constants.HttpVersion
         };
 
@@ -60,9 +59,9 @@ namespace Urlscan
             Size = size;
             Seen = new(Size);
 
-            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Urlscan C# Live Client - actually-akac/Urlscan");
-            Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(Constants.AcceptedEncoding);
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.LiveUserAgent);
+            Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.JsonContentType);
 
             Timer = new()
             {
