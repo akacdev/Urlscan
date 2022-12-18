@@ -354,7 +354,7 @@ namespace Urlscan
                     $"search/?q={query}&size={chunkSize}{(searchAfter is not null ? $"&search_after={searchAfter}" : "")}");
 
                 SearchContainer cont = await res.Deseralize<SearchContainer>();
-                if (!cont.HasMore || cont.Results.Length == 0) return cont.Results;
+                if (cont.Results.Length == 0) break;
 
                 JsonElement[] sort = cont.Results.Last().Sort;
 
