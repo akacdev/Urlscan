@@ -2,9 +2,24 @@
 
 namespace Urlscan
 {
-    public class UrlscanException : Exception { public UrlscanException(string message) : base(message) { } }
-    public class NxDomainException : Exception { public NxDomainException(string message) : base(message) { } }
-    public class SillyException : Exception { public SillyException(string message) : base(message) { } }
+    /// <summary>
+    /// A custom Urlscan exception.
+    /// </summary>
+    public class UrlscanException : Exception
+    {
+        /// <summary>
+        /// Milliseconds until you can retry this request again. Provided when there is a ratelimit.
+        /// </summary>
+        public int? RetryAfter { get; set; }
+
+        /// <summary>
+        /// An user-friendly Urlscan error.
+        /// </summary>
+        public UrlscanError Error { get; set; }
+
+        public UrlscanException(string message) : base(message) { }
+    }
+
     public class UnauthorizedException : Exception
     {
         public UnauthorizedException() :

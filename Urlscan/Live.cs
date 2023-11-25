@@ -9,9 +9,9 @@ using System.Timers;
 namespace Urlscan
 {
     /// <summary>
-    /// The secondary API client specifically for the live scans endpoint.<br/>
-    /// This polls the API on regular intervals and delivers you newly created scans through events.<br/>
-    /// Primairly meant to be used by people who wish to process newly created scans for their own phishing threat intelligence.
+    /// The secondary class designed for the live scans endpoint.<br/>
+    /// This polls the API on regular intervals and retrieves newly created scans through the use of events.<br/>
+    /// You can make use of this to process newly created scans for phishing threat intelligence.
     /// </summary>
     public class LiveClient
     {
@@ -59,9 +59,9 @@ namespace Urlscan
             Size = size;
             Seen = new(Size);
 
-            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(Constants.AcceptedEncoding);
+            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.LiveUserAgent);
-            Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.JsonContentType);
+            Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
             Timer = new()
             {
@@ -99,10 +99,10 @@ namespace Urlscan
         /// Poll for the next chunk of recently finished submissions. 
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="UrlscanException"></exception>
         private async Task Poll()
         {
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"json/live?size={Size}", absoluteUrl: true);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"json/live?size={Size}", absolutePath: true);
 
             if (res.StatusCode == HttpStatusCode.OK) FailedRequests = 0;
             else
@@ -112,7 +112,7 @@ namespace Urlscan
                 if (FailedRequests >= 5)
                 {
                     Stop();
-                    throw new Exception($"Urlscan is likely having some issues right now, disabling Live polling.");
+                    throw new UrlscanException($"Urlscan is likely having some issues right now, disabling Live polling.");
                 }
             } 
 
@@ -138,6 +138,10 @@ namespace Urlscan
             foreach (string uuid in toRemove) Seen.Remove(uuid);
         }
 
+        /// <summary>
+        /// Called whenever a new scan is discovered.
+        /// </summary>
+        /// <param name="scan"></param>
         public void OnScan(LiveScan scan)
         {
             Handler.Invoke(this, scan);

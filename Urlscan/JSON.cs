@@ -21,7 +21,6 @@ namespace Urlscan
                 _ => throw new JsonException(),
             };
         }
-
     }
 
     public class StringIntConverter : JsonConverter<int>
@@ -39,7 +38,6 @@ namespace Urlscan
                 _ => throw new JsonException(),
             };
         }
-
     }
 
     public class KebabCaseNamingPolicy : JsonNamingPolicy

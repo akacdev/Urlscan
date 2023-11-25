@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Urlscan
 {
     /// <summary>
-    /// The primary class for interacting with the Urlscan API. 
+    /// The primary class for interacting with the Urlscan API. Create an instance of it by calling a constructor.
     /// </summary>
     public class UrlscanClient
     {
@@ -45,9 +44,9 @@ namespace Urlscan
             UsesAccountSID = sid is not null;
             Sid = sid;
 
-            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(Constants.AcceptedEncoding);
+            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.UserAgent);
-            Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.JsonContentType);
+            Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             Client.DefaultRequestHeaders.Add("API-Key", key);
         }
 
@@ -57,7 +56,7 @@ namespace Urlscan
         /// <exception cref="UrlscanException"></exception>
         public async Task<Stats> GetStats()
         {
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, "stats", absoluteUrl: true);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, "stats", absolutePath: true);
 
             return await res.Deseralize<Stats>();
         }
@@ -81,8 +80,7 @@ namespace Urlscan
             string referer = null,
             bool overrideSafety = false,
             Visibility visibility = Visibility.Public,
-            ScanCountry country = ScanCountry.Auto
-        )
+            ScanCountry country = ScanCountry.Auto)
         {
             return await Scan(new ScanParameters()
             {
@@ -105,7 +103,7 @@ namespace Urlscan
         public async Task<Submission> Scan(ScanParameters parameters)
         {
             if (parameters is null) throw new ArgumentNullException(nameof(parameters), "Scan parameters are null or empty.");
-            if (string.IsNullOrEmpty(parameters.Url)) throw new ArgumentNullException(nameof(parameters.Url), "Scan URL is null or empty.");
+            if (string.IsNullOrEmpty(parameters.Url)) throw new ArgumentNullException(nameof(parameters), "Scan URL is null or empty.");
 
             if (parameters.Country == ScanCountry.Auto) parameters.Country = null;
             if (parameters.OverrideSafety != true) parameters.OverrideSafety = null;
@@ -119,7 +117,7 @@ namespace Urlscan
         }
 
         /// <summary>
-        /// Fetch a result.
+        /// Fetch a scan result.
         /// </summary>
         /// <param name="uuid"></param>
         /// <returns>The result, or <see langword="null"></see> if none is found.</returns>
@@ -158,23 +156,25 @@ namespace Urlscan
         /// <param name="uuid">The UUID of the scan you want to poll for.</param>
         /// <param name="delay">The delay until polling starts.</param>
         /// <param name="interval">The interval between individual polls.</param>
+        /// <param name="maxRetries">The maximum amount of poll retries.</param>
         /// <exception cref="UrlscanException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<Result> Poll(string uuid, int delay = 5000, int interval = 2000)
+        public async Task<Result> Poll(string uuid, int delay = 5000, int interval = 2000, int maxRetries = Constants.MaxPollingRetries)
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "Submission's UUID is null or empty.");
             if (delay <= 0) throw new ArgumentOutOfRangeException(nameof(delay), "Delay must be a positive value.");
             if (delay >= 60000) throw new ArgumentOutOfRangeException(nameof(delay), "Delay must be less than a minute.");
             if (interval <= 0) throw new ArgumentOutOfRangeException(nameof(delay), "Delay must be a positive value.");
             if (interval >= 60000) throw new ArgumentOutOfRangeException(nameof(delay), "Interval must be less than a minute.");
+            if (maxRetries <= 0) throw new ArgumentOutOfRangeException(nameof(delay), "Max retries must be a positive value.");
 
             Result res;
             int retries = 0;
 
             await Task.Delay(delay);
 
-            while (retries < Constants.MaxPollingRetries)
+            while (retries < maxRetries)
             {
                 res = await GetResult(uuid);
                 if (res is not null) return res;
@@ -189,12 +189,11 @@ namespace Urlscan
         /// <summary>
         /// Returns basic information about your account.
         /// </summary>
-
         /// <exception cref="UrlscanException"></exception>
         /// <exception cref="UnauthorizedException"></exception>
         public async Task<User> GetCurrentUser()
         {
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, "user/username", sid: Sid, absoluteUrl: true);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, "user/username", sid: Sid, absolutePath: true);
 
             return await res.Deseralize<User>();
         }
@@ -241,7 +240,7 @@ namespace Urlscan
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "Result's UUID is null or empty.");
 
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"screenshots/{uuid}.png", target: HttpStatusCode.OK | HttpStatusCode.NotFound);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"screenshots/{uuid}.png", target: HttpStatusCode.OK | HttpStatusCode.NotFound, absolutePath: true);
             if (res.StatusCode == HttpStatusCode.NotFound) return null;
 
             return res.Content.ReadAsStream();
@@ -285,7 +284,7 @@ namespace Urlscan
             if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Width must be a positive value.");
             if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Height must be a positive value.");
 
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"liveshot/?&width={width}&height={height}&url={url}", target: HttpStatusCode.OK | HttpStatusCode.NotFound);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"liveshot/?&width={width}&height={height}&url={url}", target: HttpStatusCode.OK | HttpStatusCode.NotFound, absolutePath: true);
             if (res.StatusCode == HttpStatusCode.NotFound) return null;
 
             return res.Content.ReadAsStream();
@@ -316,10 +315,13 @@ namespace Urlscan
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "Result's UUID is null or empty.");
 
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"dom/{uuid}", target: HttpStatusCode.OK | HttpStatusCode.NotFound);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"dom/{uuid}", target: HttpStatusCode.OK | HttpStatusCode.NotFound, absolutePath: true);
             if (res.StatusCode == HttpStatusCode.NotFound) return null;
-            
-            return Encoding.UTF8.GetString(await res.Content.ReadAsByteArrayAsync());
+
+            using Stream stream = await res.Content.ReadAsStreamAsync();
+            using StreamReader sr = new(stream);
+
+            return await sr.ReadToEndAsync();
         }
 
         /// <summary>
@@ -445,16 +447,16 @@ namespace Urlscan
             if (!UsesAccountSID) throw new UnauthorizedException();
 
             if (parameters is null) throw new ArgumentNullException(nameof(parameters), "Verdict payload is null.");
-            if (parameters.Brands is null) throw new ArgumentNullException(nameof(parameters.UUID), "Brands can't be null, but you can provide an empty array.");
-            if (string.IsNullOrEmpty(parameters.UUID)) throw new ArgumentNullException(nameof(parameters.UUID), "Result UUID is null or empty.");
-            if (string.IsNullOrEmpty(parameters.ScopeValue)) throw new ArgumentNullException(nameof(parameters.ScopeValue), "Scope value is null or empty.");
-            if (string.IsNullOrEmpty(parameters.Comment)) throw new ArgumentNullException(nameof(parameters.Comment), "Comment is null or empty.");
-            if (parameters.Comment.Length < 40) throw new ArgumentOutOfRangeException(nameof(parameters.Comment), "Comment is too short (<40 characters).");
-            if (parameters.Comment.Length > 500) throw new ArgumentOutOfRangeException(nameof(parameters.Comment), "Comment is too long (>500 characters).");
+            if (parameters.Brands is null) throw new ArgumentNullException(nameof(parameters), "Brands can't be null, but you can provide an empty array.");
+            if (string.IsNullOrEmpty(parameters.UUID)) throw new ArgumentNullException(nameof(parameters), "Result UUID is null or empty.");
+            if (string.IsNullOrEmpty(parameters.ScopeValue)) throw new ArgumentNullException(nameof(parameters), "Scope value is null or empty.");
+            if (string.IsNullOrEmpty(parameters.Comment)) throw new ArgumentNullException(nameof(parameters), "Comment is null or empty.");
+            if (parameters.Comment.Length < 40) throw new ArgumentOutOfRangeException(nameof(parameters), "Comment is too short (<40 characters).");
+            if (parameters.Comment.Length > 500) throw new ArgumentOutOfRangeException(nameof(parameters), "Comment is too long (>500 characters).");
 
             parameters.Brands = parameters.Brands.Select(x => x.ToLower()).ToArray();
 
-            await Client.Request(HttpMethod.Post, "result/verdict/", parameters, options: Constants.VerdictJsonOptions, sid: Sid, absoluteUrl: true);
+            await Client.Request(HttpMethod.Post, "result/verdict/", parameters, options: Constants.VerdictJsonOptions, sid: Sid, absolutePath: true);
         }
 
         /// <summary>
@@ -467,10 +469,10 @@ namespace Urlscan
         {
             if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "UUID of the result to find similar scans for is null or empty.");
 
-            if (Client.DefaultRequestHeaders.Accept.All(x => x.MediaType != Constants.HtmlContentType))
-                Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.HtmlContentType);
+            if (Client.DefaultRequestHeaders.Accept.All(x => x.MediaType != "text/html"))
+                Client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
 
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"result/{uuid}/related/", sid: Sid, absoluteUrl: true);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"result/{uuid}/related/", sid: Sid, absolutePath: true);
             string html = await res.Content.ReadAsStringAsync();
 
             if (html.Contains(Constants.ZeroSimilarHitsMessage)) return Array.Empty<SimilarScan>();

@@ -1,143 +1,72 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Urlscan
 {
-    public static class API
+    internal static class API
     {
-        public const int MaxRetries = 3;
-        public const int RetryDelay = 1000;
-        public const int PreviewMaxLength = 500;
-
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             HttpStatusCode target = HttpStatusCode.OK,
             string sid = null,
-            bool absoluteUrl = false)
-        => await Request(cl, method, url, null, target, sid, absoluteUrl);
+            bool absolutePath = false)
+        => await Request(cl, method, path, null, target, sid, absolutePath);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             object obj,
             HttpStatusCode target = HttpStatusCode.OK,
             JsonSerializerOptions options = null,
             string sid = null,
-            bool absoluteUrl = false)
-        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj, options ?? Constants.JsonOptions), Encoding.UTF8, Constants.JsonContentType), target, sid, absoluteUrl);
+            bool absolutePath = false)
+        => await Request(cl, method, path, await obj.Serialize(options ?? Constants.JsonOptions), target, sid, absolutePath);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             HttpContent content,
             HttpStatusCode target = HttpStatusCode.OK,
             string sid = null,
-            bool absoluteUrl = false)
+            bool absolutePath = false)
         {
-            int retries = 0;
-
-            HttpResponseMessage res = null;
-
-            while (retries < MaxRetries)
+            using HttpRequestMessage req = new(method, absolutePath ? path : string.Concat($"api/v", Constants.Version, "/", path))
             {
-                HttpRequestMessage req = new(method, absoluteUrl ? url : $"api/v{Constants.Version}/{url}")
-                {
-                    Content = content
-                };
+                Content = content
+            };
 
-                if (sid is not null) req.Headers.Add($"Cookie", $"sid={sid}");
+            if (sid is not null) req.Headers.Add($"Cookie", $"sid={sid}");
 
-                res = await cl.SendAsync(req);
+            HttpResponseMessage res = await cl.SendAsync(req);
+            content?.Dispose();
 
-                retries++;
+            if (target.HasFlag(res.StatusCode)) return res;
 
-                if ((int)res.StatusCode < Constants.ErrorStatusCode) break;
-                else await Task.Delay(RetryDelay);
-            }
+            UrlscanError err = (await res.Deseralize<UrlscanError>())
+                ?? throw new UrlscanException($"Failed to request {method} {path}, received status code {res.StatusCode}\nPreview: {await res.GetPreview()}");
 
-            if (retries == MaxRetries)
+            UrlscanException ex = new($"Failed to request {method} {path}, received an API error \"{err.Description}\" with message \"{err.Message}\"")
             {
-                string text = await res.Content.ReadAsStringAsync();
-                string preview = text[..Math.Min(text.Length, PreviewMaxLength)];
+                Error = err
+            };
 
-                throw new UrlscanException(
-                    $"Ran out of retry attempts while requesting {method} {url}, last status code: {res.StatusCode}" +
-                    $"\nPreview:" +
-                    $"\n{preview}");
-            }
-
-            if (!target.HasFlag(res.StatusCode))
+            if (res.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                if (res.StatusCode == HttpStatusCode.TooManyRequests)
-                {
-                    RetryConditionHeaderValue retry = res.Headers.RetryAfter;
-                    if (retry is not null) await Task.Delay((int)retry.Delta.Value.TotalMilliseconds);
-                }
-                else if (res.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    string json = await res.Content.ReadAsStringAsync();
-                    string preview = json[..Math.Min(json.Length, PreviewMaxLength)];
-
-                    try
-                    {
-                        UrlscanError err = JsonSerializer.Deserialize<UrlscanError>(json);
-
-                        throw err.Message switch
-                        {
-                            "DNS Error - Could not resolve domain" => new NxDomainException(err.Description),
-                            "Don't be silly now ..." => new SillyException(err.Description),
-                            _ => new UrlscanException($"Request resulted in the error \"{err.Description}\" with message \"{err.Message}\""),
-                        };
-                    }
-                    catch (JsonException)
-                    {
-                        throw new UrlscanException($"Requested resulted in a 400 Bad Request, and could not be parsed into JSON. Preview:\n{preview}");
-                    }
-                }
-                else
-                {
-                    string text = await res.Content.ReadAsStringAsync();
-                    string preview = text[..Math.Min(text.Length, PreviewMaxLength)];
-
-                    throw new UrlscanException(
-                    $"Failed to request {method} {url}, received the following status code: {res.StatusCode}" +
-                    $"\nPreview:" +
-                    $"\n{preview}");
-                }
+                RetryConditionHeaderValue retry = res.Headers.RetryAfter;
+                if (retry is not null) ex.RetryAfter = (int)retry.Delta.Value.TotalMilliseconds;
             }
-
-            return res;
-        }
-
-        public static async Task<T> Deseralize<T>(this HttpResponseMessage res, JsonSerializerOptions options = null)
-        {
-            Stream stream = await res.Content.ReadAsStreamAsync();
-            if (stream.Length == 0) throw new UrlscanException("Response content is empty, can't parse as JSON.");
-
-            try
-            {
-                return await JsonSerializer.DeserializeAsync<T>(stream, options ?? Constants.JsonOptions);
-            }
-            catch (Exception ex)
-            {
-                using StreamReader sr = new(stream);
-                string text = await sr.ReadToEndAsync();
-
-                throw new($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nPreview: {text[..Math.Min(text.Length, PreviewMaxLength)]}");
-            }
+            
+            throw ex;
         }
     }
 }

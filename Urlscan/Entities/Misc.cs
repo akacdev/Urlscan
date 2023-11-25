@@ -4,7 +4,7 @@ namespace Urlscan
 {
     /// <summary>
     /// Determines the visibility of a scan.<br/>
-    /// Official docs: <a href="https://urlscan.io/blog/2022/07/27/scan-visibility-best-practices/"></a>
+    /// Best pracices: <a href="https://urlscan.io/blog/2022/07/27/scan-visibility-best-practices/"></a>
     /// </summary>
     public enum Visibility
     {
@@ -150,14 +150,26 @@ namespace Urlscan
         Comment
     }
 
+    /// <summary>
+    /// Details about an user-friendly AbuseIPDB error.
+    /// </summary>
     public class UrlscanError
     {
+        /// <summary>
+        /// An user-friendly error message.
+        /// </summary>
         [JsonPropertyName("message")]
         public string Message { get; set; }
 
+        /// <summary>
+        /// An user-friendly error description.
+        /// </summary>
         [JsonPropertyName("description")]
         public string Description { get; set; }
 
+        /// <summary>
+        /// The HTTP status code caused by this error.
+        /// </summary>
         [JsonPropertyName("status")]
         public int Status { get; set; }
     }

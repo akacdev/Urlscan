@@ -5,11 +5,10 @@
 ### 🔎 An async and lightweight C# library for interacting with the Urlscan API.
 
 ## Usage
-Provides an easy interface for interacting with the Urlscan API.
-
+This library provides an easy interface for interacting with the Urlscan API.
 You can use this library to automate your Urlscan submissions, search for existing scans, track newly submitted scans and analyse network activity of malicious websites.
 
-To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+To get started, import the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
 ```rust
 dotnet add package Urlscan
 ```
@@ -22,20 +21,23 @@ using Urlscan;
 Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ### Obtaining API keys
-> API keys can be created in the user section `Settings & API`
+API keys can be created under the user section `Settings & API`.
 
-> Secure identifier SID cookies can be obtained from your browser's cookie storage. Make sure to only copy the value, without the name! 
+Secure identifier SID cookies can be obtained from your browser's cookie storage. Make sure to only copy the value, without the name! 
 
-## Features
-- Built for **.NET 6** and **.NET 7**
+## Properties
+- Built for **.NET 8**, **.NET 7** and **.NET 6**
 - Fully **async**
 - Extensive **XML documentation**
-- Coverage of the free API endpoints, including some user-only and beta routes  
-- **No external dependencies** (uses integrated HTTP and JSON)
-- **Custom exceptions** (`UrlscanException`) for advanced catching
-- Automatic **ratelimit** handling and request **retries**
+- Coverage of the free API endpoints, including some user-only and beta routes
+- **No external dependencies** (makes use of built-in `HttpClient` and `JsonSerializer`)
+- **Custom exceptions** (`UrlscanException`) for easy debugging
+- Parsing of custom Urlscan errors
 - Example project to demonstrate all capabilities of the library
+
+## Features
 - Scan suspicious URLs and submit verdicts on them
+- Search for public scans using ElasticSearch queries
 - Download screenshots and page DOMs
 - Empower your threat intelligence with live scans through `LiveClient`
 
@@ -105,30 +107,8 @@ await client.AddVerdict(new VerdictParameters()
 });
 ```
 
-## Available Methods
-- Task **AddVerdict**(Result result, VerdictScope scope, VerdictType type, string comment, string[] brands, ThreatType[] threats)
-- Task **AddVerdict**(string uuid, VerdictScope scope, string scopeValue, VerdictType type, string comment, string[] brands, ThreatType[] threats)
-- Task **AddVerdict**(VerdictParameters parameters)
-- Task\<byte[]> **DownloadScreenshot**(Result result)
-- Task\<byte[]> **DownloadScreenshot**(string uuid)
-- Task\<byte[]> **Liveshot**(string url, int width = 1280, int height = 1024)
-- Task\<Result> **GetResult**(string uuid)
-- Task\<Result> **Poll**(string uuid, int delay = 5000, int interval = 2000)
-- Task\<Result> **Poll**(Submission submission, int delay = 5000, int interval = 2000)
-- Task\<SearchItem[]> **Search**(string query, int amount = 100, string targetScan = null)
-- Task\<SimilarScan[]> **GetSimilarScans**(string uuid)
-- Task\<Stats> **GetStats**()
-- Task\<Stream> **DownloadScreenshotStream**(string uuid)
-- Task\<Stream> **LiveshotStream**(string url, int width = 1280, int height = 1024)
-- Task\<string> **DownloadDOM**(Result result)
-- Task\<string> **DownloadDOM**(string uuid)
-- Task\<Submission> **Scan**(string url, string[] tags = null, string userAgent = null, string referer = null, bool overrideSafety = false, Visibility visibility = Visibility.Public, ScanCountry country = ScanCountry.Auto)
-- Task\<Submission> **Scan**(ScanParameters parameters)
-- Task\<User> **GetCurrentUser**()
-
-## Available Events
-- EventHandler\<LiveScan> `UrlScanned`
-
 ## References
-- https://urlscan.io
-- https://twitter.com/urlscanio
+- Official website: https://urlscan.io
+- Urlscan Twitter: https://twitter.com/urlscanio
+
+*This is a community-ran library. Not affiliated with Urlscan GmbH.*

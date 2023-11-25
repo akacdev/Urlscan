@@ -9,18 +9,22 @@ namespace Example
 {
     public static class Program
     {
+        private static UrlscanClient Client;
+        private static LiveClient Live;
+
         public static async Task Main()
         {
-            Console.WriteLine("Enter your Urlscan API Key:");
+            Console.WriteLine("> Enter your Urlscan API Key:");
             string key = Console.ReadLine();
 
-            Console.WriteLine("Enter your Urlscan SID, or press enter to skip:");
+            Console.WriteLine("\n> Enter your Urlscan SID, or press enter to skip:");
             string sid = Console.ReadLine();
             if (string.IsNullOrEmpty(sid)) sid = null;
 
-            UrlscanClient client = new(key, sid);
+            Console.WriteLine();
+            Client = new(key, sid);
 
-            User user = await client.GetCurrentUser();
+            User user = await Client.GetCurrentUser();
 
             Console.WriteLine($"Current user info:");
             Console.WriteLine($"Registered: {(int)(DateTime.Now - user.CreatedAt).TotalDays} days ago");
@@ -41,12 +45,12 @@ namespace Example
             Console.WriteLine($"You've made {user.Stats.Total} sumissions, of which {user.Stats.Private + user.Stats.Unlisted} were private");
             Console.WriteLine();
 
-            Stats stats = await client.GetStats();
+            Stats stats = await Client.GetStats();
             Console.WriteLine($"Currently running scan tasks: {stats.Running}");
             Console.WriteLine($"24h stats: public: {stats.Public}, unlisted: {stats.Unlisted}, private: {stats.Private}");
             Console.WriteLine($"Total: {stats.Total}\n");
 
-            Console.Write($"Enter a URL to scan: ");
+            Console.Write($"\n> Enter a URL to scan: ");
 
             string url = Console.ReadLine();
 
@@ -55,11 +59,11 @@ namespace Example
             Submission subm;
             try
             {
-                subm = await client.Scan(new ScanParameters()
+                subm = await Client.Scan(new ScanParameters()
                 {
-                    //URL is the only necessary argument, the rest is all optional.
+                    //URL is the only mandatory argument, the rest is all optional.
                     Url = url,
-                    Tags = new string[] { "test" },
+                    Tags = ["test"],
                     Country = ScanCountry.FI,
                     UserAgent = "My-Custom-Scanner/1.0.0",
                     OverrideSafety = false,
@@ -67,21 +71,16 @@ namespace Example
                     Visibility = Visibility.Public
                 });
             }
-            catch (NxDomainException ex)
+            catch (UrlscanException ex)
             {
-                Console.WriteLine($"The domain doesn't have any DNS records.\nUrlscan Message: {ex.Message}");
-                Console.ReadKey();
-                return;
-            }
-            catch (SillyException ex)
-            {
-                Console.WriteLine($"You've entered a malformed hostname/URL.\nUrlscan Message: {ex.Message}");
+                Console.WriteLine($"Received an Urlscan exception: {ex.Message}");
+                if (ex.Error is not null) Console.WriteLine($"{ex.Error.Description} => {ex.Error.Message}");
                 Console.ReadKey();
                 return;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Received an unknown exception while scanning of type {ex.GetType().Name}\nMessage: {ex.Message}");
+                Console.WriteLine($"Received an unknown exception while scanning: {ex.GetType().Name} => {ex.Message}");
                 Console.ReadKey();
                 return;
             }
@@ -89,7 +88,7 @@ namespace Example
             Console.WriteLine($"Submission created: {subm.UUID}\n");
 
             Console.WriteLine($"Waiting for the scan to finish, this will take about 10 seconds.\n");
-            Result res = await client.Poll(subm);
+            Result res = await Client.Poll(subm);
 
             Console.WriteLine($"Page was successfully scanned by a submitter from {res.Submitter.Country}.\n");
 
@@ -129,63 +128,63 @@ namespace Example
                 Console.WriteLine($"Malicious: {cver.Malicious}\n");
             }
 
-            SimilarScan[] similar = await client.GetSimilarScans("bc1ef5f2-eddc-40ae-86c9-fb5894b5d1f2");
+            SimilarScan[] similar = await Client.GetSimilarScans("bc1ef5f2-eddc-40ae-86c9-fb5894b5d1f2");
             Console.WriteLine($"Found {similar.Length} similar scans");
 
             Console.WriteLine($"Done analysing URL\n");
 
-            Console.WriteLine($"Downloading screenshot (screenshot.png) and DOM (dom.html) to the current directory.");
-            File.WriteAllBytes("screenshot.png", await client.DownloadScreenshot(res));
-            File.WriteAllText("dom.html", await client.DownloadDOM(res));
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.WriteLine($"\n> Downloading screenshot (screenshot.png) and DOM (dom.html) to the current directory.");
+            File.WriteAllBytes("screenshot.png", await Client.DownloadScreenshot(res));
+            File.WriteAllText("dom.html", await Client.DownloadDOM(res));
 
-            if (client.UsesAccountSID)
+            if (Client.UsesAccountSID)
             {
-                Console.WriteLine("Press any key to submit a verdict to a known Discord phishing site.");
+                Console.WriteLine("\n> Press any key to submit a verdict to a known Discord phishing site.");
                 Console.ReadKey();
 
-                await client.AddVerdict(new VerdictParameters()
+                await Client.AddVerdict(new VerdictParameters()
                 {
                     UUID = "8964cc71-ea31-476c-ba8f-863bf4bf6b2f",
                     Comment = "Running a Discord phishing scam with Discord HypeSquad as their target.",
                     Scope = VerdictScope.PageDomain,
                     ScopeValue = "contact-hype-testers.com",
-                    ThreatTypes = new ThreatType[]
-                    {
+                    ThreatTypes =
+                    [
                         ThreatType.Phishing,
                         ThreatType.BrandImpersonation
-                    },
-                    Brands = new string[]
-                    {
+                    ],
+                    Brands =
+                    [
                         "Discord"
-                    },
+                    ],
                     Verdict = VerdictType.Malicious
                 });
 
-                Console.WriteLine("Successfully verdicted, see it at: https://urlscan.io/result/8964cc71-ea31-476c-ba8f-863bf4bf6b2f/#verdicts\n");
+                Console.WriteLine("Successfully verdicted, see it at: https://urlscan.io/result/8964cc71-ea31-476c-ba8f-863bf4bf6b2f/#verdicts");
 
-                Console.WriteLine("Press any key to search for scans that contain hypesquad in them.");
+                Console.WriteLine("\n> Press any key to search for scans that contain hypesquad in them.");
                 Console.ReadKey();
 
-                SearchItem[] scans = await client.Search("page.status:200 AND domain.keyword:*hypesquad*", 10);
+                SearchItem[] scans = await Client.Search("page.status:200 AND domain.keyword:*hypesquad*", 10);
                 foreach (SearchItem scan in scans)
                 {
                     Console.WriteLine(scan.Page.Url[..Math.Min(scan.Page.Url.Length, 50)]);
                 }
             }
             
-            Console.WriteLine("Press any key to start watching for newly scanned URLs.");
+            Console.WriteLine("\n> Press any key to start watching for newly scanned URLs.");
             Console.ReadKey();
 
-            LiveClient live = new(1000 * 3, 10);
-            live.UrlScanned += (sender, scan) =>
+            Live = new(1000 * 3, 10);
+
+            Live.UrlScanned += (sender, scan) =>
             {
                 Console.WriteLine(scan.Task.Url[..Math.Min(scan.Task.Url.Length, 50)]);
             };
 
-            Console.WriteLine("Demo finished, press any key to exit.");
+            Console.WriteLine("\n> Demo finished, press any key to exit.");
             Console.ReadKey();
+            Live.Stop();
         }
     }
 }
